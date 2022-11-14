@@ -13,9 +13,10 @@ import {
   Typography,
 } from "@mui/material";
 import { IInventoryFormPayload } from "../interfaces/IInventory";
+import MonitorsTable from "./MonitorsTable";
 
-const brandsStore: string[] = ["Dell", "HP", "IBM", "Lenovo"];
-const screenSizeOptions: number[] = [19, 24, 27, 32];
+export const brandsStore = ["Dell", "HP", "IBM", "Lenovo"] as const;
+const screenSizeOptions = [19, 24, 27, 32] as const;
 
 const InventoryForm = () => {
   // Form States
@@ -24,6 +25,9 @@ const InventoryForm = () => {
   const [screenSize, setScreenSize] = useState<number | null>(null);
   const [price, setPrice] = useState<number | null>(null);
   const [quantity, setQuantity] = useState<number | null>(null);
+  const [monitorsList, setMonitorsList] = useState<
+    Array<IInventoryFormPayload>
+  >([]);
   const [filledForm, setFilledForm] = useState(false);
 
   // Form Utils
@@ -41,9 +45,20 @@ const InventoryForm = () => {
     return validation;
   };
 
+  const cleanForm = () => {
+    setProductNumber(null);
+    setBrand(null);
+    setScreenSize(null);
+    setPrice(null);
+    setQuantity(null);
+  };
+
+  const handleSubmit = (form: IInventoryFormPayload) => {
+    setMonitorsList([...monitorsList, form]);
+  };
+
   useEffect(() => {
     formValidator();
-    console.log(form);
   }, [form]);
 
   return (
@@ -51,20 +66,20 @@ const InventoryForm = () => {
       <Stack
         sx={{
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           alignItems: "center",
-          minHeight: "100vh",
-          minWidth: "100vw",
           bgcolor: "#000",
+          paddingTop: 5,
+          minHeight: "100vh",
         }}
       >
-        <Box mb={2}>
+        <Box sx={{ paddingBottom: 2 }}>
           <Typography fontSize="2rem" fontWeight={700} color="#FFF">
             Add New Item
           </Typography>
         </Box>
 
-        <Box component="form">
+        <Box component="form" onSubmit={() => handleSubmit(form)}>
           <Stack
             spacing={4}
             sx={{
@@ -143,11 +158,21 @@ const InventoryForm = () => {
               />
             </FormControl>
 
-            <Button variant="contained" disabled={filledForm}>
+            <Button
+              variant="contained"
+              disabled={filledForm}
+              // type="submit"
+              onClick={() => {
+                setMonitorsList([...monitorsList, form]);
+                cleanForm();
+              }}
+            >
               Add Item
             </Button>
           </Stack>
         </Box>
+
+        <MonitorsTable monitorsList={monitorsList} />
       </Stack>
     </>
   );
